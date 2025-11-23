@@ -35,9 +35,17 @@ export const Deck: React.FC = () => {
   // 扇形牌组的状态，存储每张牌的唯一ID
   const [fanCards, setFanCards] = useState<number[]>([]);
 
-  // 初始化牌堆
+  // 预加载图片帮助函数
+  const preloadImage = (src: string) => {
+      const img = new Image();
+      img.src = src;
+  };
+
+  // 初始化牌堆 & 预加载资源
   useEffect(() => {
     setDeck(tarotDeck);
+    // 强制预加载卡背图，防止首次洗牌卡顿
+    preloadImage('/patterns/Cardback.png');
   }, []);
 
   // 进入抽牌阶段时，初始化扇形牌组
@@ -83,6 +91,9 @@ export const Deck: React.FC = () => {
     newDeck.splice(randomIndex, 1);
     setDeck(newDeck);
 
+    // 【性能优化】一旦抽中，立即在后台预加载这张牌的正面大图
+    preloadImage(selectedCard.image_url);
+
     const newDrawn = [...drawnCards, { card: selectedCard, isReversed, isRevealed: false }];
     setDrawnCards(newDrawn);
     
@@ -106,7 +117,6 @@ export const Deck: React.FC = () => {
 
     // 检查是否所有牌都已翻开
     if (newCards.every(c => c.isRevealed)) {
-        // 延迟一点时间再进入 done 状态，让用户看清最后一张牌，沉淀情绪
         setTimeout(async () => {
             setStep('done');
             await fetchReading(newCards);
@@ -197,7 +207,7 @@ export const Deck: React.FC = () => {
             {/* 牌堆区域 (洗牌时) */}
             {step === 'shuffling' && (
                 <motion.div 
-                    className="relative w-64 h-48 md:h-64 flex items-center justify-center shrink-0" 
+                    className="relative w-64 h-48 md:h-64 flex items-center justify-center shrink-0 will-change-transform" 
                 >
                     <AnimatePresence>
                     {deck.slice(0, 12).map((card, index) => {
@@ -251,7 +261,7 @@ export const Deck: React.FC = () => {
              {step === 'drawing' && (
                 <motion.div 
                     key="fan-deck-container"
-                    className="relative w-full h-48 md:h-64 flex items-center justify-center shrink-0 overflow-visible" 
+                    className="relative w-full h-48 md:h-64 flex items-center justify-center shrink-0 overflow-visible will-change-transform" 
                     initial={{ opacity: 1 }} // 容器不动，让里面的牌动
                     animate={{ opacity: 1 }}
                     exit={{ 
