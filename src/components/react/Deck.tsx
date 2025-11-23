@@ -85,7 +85,8 @@ export const Deck: React.FC = () => {
 
     const randomIndex = Math.floor(Math.random() * deck.length);
     const selectedCard = deck[randomIndex];
-    const isReversed = Math.random() > 0.5; 
+    // 调整逆位概率：只有 20% 的概率是逆位 (random < 0.2)
+    const isReversed = Math.random() < 0.2; 
 
     const newDeck = [...deck];
     newDeck.splice(randomIndex, 1);
