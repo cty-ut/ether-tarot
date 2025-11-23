@@ -29,3 +29,13 @@ body {
 .rotate-y-180 {
   transform: rotateY(180deg);
 }
+
+/* Markdown 样式增强 */
+.prose p {
+  margin-bottom: 1rem;
+}
+
+.prose strong {
+  color: #cfb53b; /* Mystic Gold */
+  font-weight: 700;
+}

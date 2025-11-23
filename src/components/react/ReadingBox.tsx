@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import ReactMarkdown from 'react-markdown';
 import type { ReadingResult } from '../../utils/aiClient';
 
 interface ReadingBoxProps {
@@ -39,8 +40,8 @@ export const ReadingBox: React.FC<ReadingBoxProps> = ({ result, isLoading }) => 
       <div className="absolute bottom-0 right-0 w-4 h-4 border-b border-r border-mystic-gold"></div>
 
       <div className="text-center mb-8">
-        <h2 className="text-xl font-serif text-mystic-gold mb-2">{result.summary}</h2>
-        <div className="flex justify-center gap-3 mt-4">
+        <h2 className="text-xl font-serif text-mystic-gold mb-2 leading-relaxed">{result.summary}</h2>
+        <div className="flex justify-center gap-3 mt-4 flex-wrap">
           {result.keywords.map((kw, i) => (
             <span key={i} className="px-3 py-1 text-[10px] uppercase tracking-wider border border-mystic-gold/20 rounded-full text-neutral-400">
               {kw}
@@ -49,10 +50,10 @@ export const ReadingBox: React.FC<ReadingBoxProps> = ({ result, isLoading }) => 
         </div>
       </div>
 
-      <div className="space-y-6 text-neutral-300 font-light leading-relaxed text-justify">
-        {result.detailed_interpretation.split('\n').map((para, i) => (
-            para.trim() && <p key={i}>{para}</p>
-        ))}
+      <div className="text-neutral-300 font-light leading-relaxed text-justify prose prose-invert prose-p:mb-4 prose-strong:text-mystic-gold prose-strong:font-bold">
+        <ReactMarkdown>
+            {result.detailed_interpretation}
+        </ReactMarkdown>
       </div>
 
       <div className="mt-8 pt-6 border-t border-white/10">
@@ -62,4 +63,3 @@ export const ReadingBox: React.FC<ReadingBoxProps> = ({ result, isLoading }) => 
     </motion.div>
   );
 };
-
