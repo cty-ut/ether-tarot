@@ -106,11 +106,11 @@ export const Deck: React.FC = () => {
 
     // 检查是否所有牌都已翻开
     if (newCards.every(c => c.isRevealed)) {
-        // 延迟一点时间再进入 done 状态，让用户看清最后一张牌
+        // 延迟一点时间再进入 done 状态，让用户看清最后一张牌，沉淀情绪
         setTimeout(async () => {
             setStep('done');
             await fetchReading(newCards);
-        }, 1000); // 1秒延迟
+        }, 1700); 
     }
   };
 
