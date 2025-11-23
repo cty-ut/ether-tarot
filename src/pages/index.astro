@@ -1,0 +1,61 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Ether Tarot | 以太塔罗">
+	<main class="relative w-full h-screen flex flex-col items-center justify-center overflow-hidden">
+		{/* 动态星空背景 (CSS 实现) */}
+		<div class="absolute inset-0 z-0 opacity-40">
+			<div class="absolute w-[2px] h-[2px] bg-white rounded-full top-1/4 left-1/4 animate-pulse"></div>
+			<div class="absolute w-[3px] h-[3px] bg-mystic-gold rounded-full top-1/3 left-2/3 animate-pulse delay-75"></div>
+			<div class="absolute w-[1px] h-[1px] bg-white rounded-full top-2/3 left-1/3 animate-pulse delay-150"></div>
+			<div class="absolute w-[2px] h-[2px] bg-mystic-purple rounded-full top-1/2 left-1/2 animate-pulse delay-300"></div>
+			<div class="absolute w-[1px] h-[1px] bg-white rounded-full top-[10%] left-[80%] animate-pulse"></div>
+            {/* 增加更多星星 */}
+            {Array.from({ length: 20 }).map((_, i) => (
+                <div 
+                    class="absolute bg-white rounded-full animate-pulse"
+                    style={{
+                        width: Math.random() * 2 + 'px',
+                        height: Math.random() * 2 + 'px',
+                        top: Math.random() * 100 + '%',
+                        left: Math.random() * 100 + '%',
+                        animationDelay: Math.random() * 2 + 's',
+                        opacity: Math.random() * 0.5
+                    }}
+                ></div>
+            ))}
+		</div>
+		
+        {/* 径向渐变光晕 */}
+        <div class="absolute inset-0 z-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-mystic-purple/20 via-transparent to-transparent pointer-events-none"></div>
+
+		<div class="z-10 text-center space-y-12 px-6 flex flex-col items-center">
+			<div class="relative">
+                {/* 标题光晕 */}
+                <div class="absolute -inset-4 bg-mystic-gold/20 blur-xl rounded-full opacity-50 animate-pulse"></div>
+                <h1 class="relative text-5xl md:text-7xl font-serif font-bold tracking-[0.2em] text-transparent bg-clip-text bg-gradient-to-b from-mystic-gold via-[#f0e68c] to-[#8a7e4e] drop-shadow-2xl">
+                    ETHER TAROT
+                </h1>
+            </div>
+
+			<p class="text-neutral-400 text-sm md:text-lg tracking-[0.15em] font-light max-w-md mx-auto leading-loose border-t border-b border-white/5 py-6">
+				在这片数字星空下<br/>
+				寻找潜意识的倒影
+			</p>
+			
+			<a 
+				href="/reading" 
+				class="group relative px-10 py-4 overflow-hidden rounded-full bg-transparent border border-mystic-gold/30 text-mystic-gold transition-all duration-500 hover:border-mystic-gold hover:shadow-[0_0_20px_rgba(207,181,59,0.3)]"
+			>
+                <span class="absolute inset-0 w-full h-full bg-mystic-gold/10 scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></span>
+				<span class="relative text-sm tracking-[0.3em] uppercase font-medium">开始仪式</span>
+			</a>
+		</div>
+
+		<footer class="absolute bottom-8 text-[10px] text-neutral-600 tracking-widest uppercase flex flex-col items-center gap-2">
+            <div class="w-px h-8 bg-gradient-to-b from-transparent via-neutral-700 to-transparent"></div>
+			<span>Designed for the Soul</span>
+		</footer>
+	</main>
+</Layout>

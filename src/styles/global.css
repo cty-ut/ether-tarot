@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply text-white font-sans antialiased overflow-x-hidden;
+  /* 背景样式已移至 Layout.astro 以获得更好的控制 */
+}
+
+/* 隐藏滚动条但保留功能 */
+::-webkit-scrollbar {
+  width: 0px;
+  background: transparent;
+}
+
+/* 3D 翻转效果必须 */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}

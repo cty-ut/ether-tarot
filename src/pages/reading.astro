@@ -1,0 +1,28 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { Deck } from '../components/react/Deck';
+---
+
+<Layout title="Reading | Ether Tarot">
+	<main class="w-full min-h-screen flex flex-col relative pb-20">
+		
+        {/* 顶部导航 (静态渲染，不耗费 JS) */}
+        <header class="w-full p-6 flex justify-between items-center z-10">
+            <a href="/" class="text-mystic-gold text-xs tracking-widest uppercase hover:opacity-80">
+                ← 退出仪式
+            </a>
+            <div class="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center">
+                {/* 设置按钮预留 */}
+                <span class="block w-1 h-1 bg-mystic-gold rounded-full"></span>
+            </div>
+        </header>
+
+        {/* 核心交互区 (React Island) */}
+        <div class="flex-1 flex items-center justify-center w-full">
+            {/* client:only="react" 确保它只在客户端渲染，因为它依赖大量的浏览器 API (window, random) */}
+            <Deck client:only="react" />
+        </div>
+
+	</main>
+</Layout>
+
