@@ -128,7 +128,7 @@
 
 #### 5.2 真人塔罗师样例 (Few-Shot Examples)
 
-**Example 1: 圣杯五 (逆位) - 关于“失恋”的提问**
+ **Example 1: 圣杯五 (逆位) - 关于“失恋”的提问**
 *   **用户问题:** "我和前任还有机会复合吗？"
 *   **Bad AI Response:** "圣杯五逆位代表走出悲伤。你有机会复合，但要看缘分。"
 *   **Good AI Response (Spiritual):**
