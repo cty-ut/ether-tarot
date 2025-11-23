@@ -1,8 +1,8 @@
 import type { APIRoute } from 'astro';
 import { GoogleGenAI } from "@google/genai";
 
-// 从服务端环境变量获取 Key
-const API_KEY = import.meta.env.GEMINI_API_KEY;
+// 从服务端环境变量获取 Key (兼容 Astro env 和 Node.js process.env)
+const API_KEY = import.meta.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY;
 
 const SYSTEM_INSTRUCTION = `
 你是一位资深的塔罗咨询师，擅长荣格心理学与古典塔罗。
