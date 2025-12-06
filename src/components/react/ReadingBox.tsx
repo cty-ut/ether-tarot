@@ -1,14 +1,107 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
+import html2canvas from 'html2canvas';
 import type { ReadingResult } from '../../utils/aiClient';
+import type { TarotCard, SpreadConfig } from '../../utils/tarotData';
+import { ShareCard } from './ShareCard';
+import { DonateModal } from './DonateModal';
 
 interface ReadingBoxProps {
   result: ReadingResult | null;
   isLoading: boolean;
+  question: string;
+  cards: { card: TarotCard; isReversed: boolean }[];
+  spreadConfig: SpreadConfig;
 }
 
-export const ReadingBox: React.FC<ReadingBoxProps> = ({ result, isLoading }) => {
+export const ReadingBox: React.FC<ReadingBoxProps> = ({ result, isLoading, question, cards, spreadConfig }) => {
+  const shareCardRef = useRef<HTMLDivElement>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [showToast, setShowToast] = useState(false);
+  const [isDonateOpen, setIsDonateOpen] = useState(false);
+
+  const handleGenerateImage = async () => {
+    if (!shareCardRef.current) return;
+    setIsGenerating(true);
+
+    try {
+      const canvas = await html2canvas(shareCardRef.current, {
+        scale: 2, 
+        useCORS: true, 
+        backgroundColor: '#0a0a0a', 
+      });
+
+      const image = canvas.toDataURL('image/png');
+      setPreviewImage(image);
+
+    } catch (error) {
+      console.error("Failed to generate image:", error);
+      alert("生成图片失败，请重试");
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleClosePreview = () => {
+    setPreviewImage(null);
+  };
+
+  // 辅助函数：DataURL 转 Blob
+  const dataURLtoBlob = (dataurl: string) => {
+    const arr = dataurl.split(',');
+    const mime = arr[0].match(/:(.*?);/)![1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new Blob([u8arr], { type: mime });
+  };
+
+  const handleShareOrSave = async () => {
+    if (!previewImage) return;
+
+    const blob = dataURLtoBlob(previewImage);
+    const file = new File([blob], `EtherTarot-${new Date().toISOString().slice(0,10)}.png`, { type: 'image/png' });
+
+    // 尝试调用原生分享 (iOS/Android)
+    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({
+          files: [file],
+          title: 'Ether Tarot Reading',
+          text: '我的塔罗牌解读',
+        });
+        // 分享成功视为保存成功
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 3000);
+      } catch (error) {
+        // 用户取消分享不报错
+        if ((error as Error).name !== 'AbortError') {
+           console.error("Share failed", error);
+           // 分享失败尝试下载
+           triggerDownload();
+        }
+      }
+    } else {
+      // 不支持 Share API，回退到下载
+      triggerDownload();
+    }
+  };
+
+  const triggerDownload = () => {
+    if (!previewImage) return;
+    const link = document.createElement('a');
+    link.href = previewImage;
+    link.download = `EtherTarot-${new Date().toISOString().slice(0,10)}.png`;
+    link.click();
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 3000);
+  };
+
   if (isLoading) {
     return (
       <motion.div 
@@ -60,6 +153,94 @@ export const ReadingBox: React.FC<ReadingBoxProps> = ({ result, isLoading }) => 
         <h3 className="text-mystic-gold text-xs uppercase tracking-widest mb-2">指引</h3>
         <p className="text-white italic">{result.advice}</p>
       </div>
+
+      {/* 底部操作栏 */}
+      <div className="mt-10 flex flex-col items-center gap-4">
+        
+        {/* 随喜赞赏按钮 - 放在生成报告按钮上方，作为一个低调但显眼的入口 */}
+        <button 
+            onClick={() => setIsDonateOpen(true)}
+            className="flex items-center gap-2 text-mystic-gold/40 hover:text-mystic-gold transition-colors group text-[10px] tracking-[0.2em]"
+        >
+            <span className="text-base opacity-60 group-hover:opacity-100 group-hover:scale-110 transition-all">✨</span>
+            <span className="border-b border-transparent group-hover:border-mystic-gold/50 pb-0.5 uppercase">
+                随喜赞赏 · Donate
+            </span>
+        </button>
+
+        <button 
+          onClick={handleGenerateImage}
+          disabled={isGenerating}
+          className="group relative px-6 py-2 bg-mystic-gold/10 border border-mystic-gold/30 rounded-full text-mystic-gold text-xs uppercase tracking-widest hover:bg-mystic-gold hover:text-black transition-all duration-300 flex items-center gap-2 disabled:opacity-50"
+        >
+          {isGenerating ? (
+            <>
+               <span className="animate-spin">✦</span> 生成中...
+            </>
+          ) : (
+            <>
+               <span>✦</span> 生成结案报告
+            </>
+          )}
+        </button>
+      </div>
+
+      {/* 隐藏的截图用组件 */}
+      <div className="absolute left-[-9999px] top-[-9999px]">
+          <ShareCard 
+            ref={shareCardRef}
+            question={question}
+            cards={cards}
+            result={result}
+            spreadConfig={spreadConfig}
+          />
+      </div>
+
+      {/* 赞赏模态框 */}
+      <DonateModal isOpen={isDonateOpen} onClose={() => setIsDonateOpen(false)} />
+
+      {/* 图片预览模态框 */}
+      {previewImage && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm" onClick={handleClosePreview}>
+           
+           {/* 中间紧凑的容器 */}
+           <div 
+             className="relative flex flex-col items-center bg-[#0a0a0a] border border-mystic-gold/20 rounded-xl p-4 shadow-2xl max-w-[90vw] max-h-[90vh]" 
+             onClick={(e) => e.stopPropagation()}
+           >
+              {/* 图片容器 - 允许滚动如果太长 */}
+              <div className="relative overflow-auto custom-scrollbar rounded-lg mb-4 max-h-[calc(90vh-100px)]">
+                 <img src={previewImage} alt="Generated Tarot Reading" className="w-auto h-auto max-w-full object-contain block" />
+              </div>
+
+              {/* 提示语 */}
+              <p className="text-mystic-gold/60 text-[10px] tracking-widest animate-pulse">长按保存 · Long Press to Save</p>
+
+              {/* 底部按钮组 - 更紧凑 */}
+              <div className="flex gap-3 w-full max-w-[300px] pt-2">
+                 <button 
+                    onClick={handleClosePreview}
+                    className="flex-1 py-2.5 rounded-full border border-white/10 text-white/60 text-[10px] tracking-widest uppercase hover:bg-white/10 transition-colors backdrop-blur-md"
+                 >
+                    关闭 Close
+                 </button>
+                 <button 
+                    onClick={handleShareOrSave}
+                    className="flex-1 py-2.5 rounded-full bg-mystic-gold text-black text-[10px] tracking-widest uppercase text-center font-bold hover:bg-yellow-500 transition-colors shadow-lg"
+                 >
+                    保存 Save
+                 </button>
+              </div>
+           </div>
+
+           {/* 成功 Toast */}
+           {showToast && (
+              <div className="absolute top-10 left-1/2 -translate-x-1/2 bg-green-500/90 text-white px-6 py-2 rounded-full text-xs tracking-wider shadow-xl backdrop-blur-sm z-[60]">
+                  ✨ Saved Successfully
+              </div>
+           )}
+        </div>
+      )}
     </motion.div>
   );
 };

@@ -305,3 +305,47 @@ export const tarotDeck: TarotCard[] = [
     };
   })
 ];
+
+export interface SpreadConfig {
+  id: string;
+  name: string;
+  description: string;
+  cardCount: number;
+  positionNames: string[];
+  promptContext: string;
+}
+
+export const spreads: SpreadConfig[] = [
+  {
+    id: 'daily-guidance',
+    name: '每日一牌',
+    description: '抽取一张牌，获取今日的指引与启示',
+    cardCount: 1,
+    positionNames: ['今日指引'],
+    promptContext: '请基于这张牌，为用户提供今日的运势指引和行动建议。重点关注当下的能量状态。'
+  },
+  {
+    id: 'time-flow',
+    name: '时间流',
+    description: '过去、现在、未来三张牌，洞察事物的发展脉络',
+    cardCount: 3,
+    positionNames: ['过去', '现在', '未来'],
+    promptContext: '请分析时间的流动，过去的影响如何导致现在的局面，以及未来的可能走向。'
+  },
+  {
+    id: 'choice-guidance',
+    name: '二选一',
+    description: '面临抉择时，对比两个选项的发展与结果',
+    cardCount: 5,
+    positionNames: ['现状', '选择A的过程', '选择A的结果', '选择B的过程', '选择B的结果'],
+    promptContext: '用户面临两个选择（A和B）。请对比分析两条路径的利弊、过程体验和最终结果，给出决策建议。'
+  },
+  {
+    id: 'lovers-pyramid',
+    name: '恋人金字塔',
+    description: '深度剖析亲密关系的现状与未来',
+    cardCount: 4,
+    positionNames: ['自己', '对方', '关系现状', '未来发展'],
+    promptContext: '请从四个维度深度剖析这段关系：用户自身的状态、对方的状态、两人目前的互动模式以及关系的未来走向。'
+  }
+];

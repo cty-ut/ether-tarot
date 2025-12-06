@@ -7,21 +7,25 @@ export interface ReadingResult {
   advice: string;
 }
 
-export async function getTarotReading(question: string, cards: { card: TarotCard; isReversed: boolean }[]): Promise<ReadingResult> {
+export async function getTarotReading(
+    question: string, 
+    cards: { card: TarotCard; isReversed: boolean }[],
+    spreadId?: string // 新增参数
+): Promise<ReadingResult> {
   try {
     // 请求本地 Astro API Route
-    console.log("Sending request to /api/reading with:", { question, cards }); // Debug log
+    console.log("Sending request to /api/reading with:", { question, cards, spreadId });
     const response = await fetch('/api/reading', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ question, cards }),
+      body: JSON.stringify({ question, cards, spreadId }),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("API Response Error:", errorText); // 打印服务端返回的具体错误文本
+      console.error("API Response Error:", errorText);
       throw new Error(`API Error: ${response.status} - ${errorText}`);
     }
 
