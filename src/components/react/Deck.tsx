@@ -213,6 +213,22 @@ export const Deck: React.FC = () => {
   // 调用 AI
   const fetchReading = async (cards: { card: TarotCard; isReversed: boolean }[], retryRecordId?: number) => {
       setIsAiLoading(true);
+      
+      let currentRecordId = retryRecordId;
+
+      // 如果不是重试，说明是新的抽牌，立即保存一个"待处理"的记录
+      if (!currentRecordId) {
+          currentRecordId = HistoryManager.saveHistory({
+              spreadId: selectedSpread.id,
+              cards: cards,
+              question: question,
+              result: null, // 先存为空
+              isError: false
+          });
+          // 立即更新UI显示
+          setHistory(HistoryManager.getHistory());
+      }
+
       try {
           // 传递牌阵 ID，让后端选择对应的 Prompt 策略
           const result = await getTarotReading(question, cards, selectedSpread.id);
@@ -220,24 +236,20 @@ export const Deck: React.FC = () => {
           
           const isError = result.summary === "连接被干扰";
           
-          if (retryRecordId) {
-              // 如果是重试，更新原有记录
-              HistoryManager.updateRecord(retryRecordId, result, isError);
-          } else {
-              // 否则保存新记录
-              HistoryManager.saveHistory({
-                  spreadId: selectedSpread.id,
-                  cards: cards,
-                  question: question,
-                  result: result,
-                  isError: isError
-              });
+          if (currentRecordId) {
+              // 请求完成后，更新这条记录
+              HistoryManager.updateRecord(currentRecordId, result, isError);
           }
           // 更新本地状态中的历史记录
           setHistory(HistoryManager.getHistory());
           
       } catch (error) {
           console.error("AI Error", error);
+          if (currentRecordId) {
+             // 如果是代码层面的严重错误，也可以标记为 Error
+             // 但通常 getTarotReading 内部 catch 后会返回 "连接被干扰" 的结果，所以这里可能走不到
+             // 不过为了保险起见，可以在这里也更新一下
+          }
       } finally {
           setIsAiLoading(false);
       }

@@ -69,9 +69,13 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({
                     <div className="flex justify-between items-start mb-2">
                       <span className="text-xs text-gray-400 font-mono">{record.date}</span>
                       <span className={`text-xs px-2 py-0.5 rounded-full ${
-                        record.isError ? 'bg-red-500/20 text-red-400' : 'bg-[#cfb53b]/20 text-[#cfb53b]'
+                        !record.result 
+                            ? 'bg-yellow-500/20 text-yellow-400'
+                            : record.isError 
+                                ? 'bg-red-500/20 text-red-400' 
+                                : 'bg-[#cfb53b]/20 text-[#cfb53b]'
                       }`}>
-                        {record.isError ? '连接失败' : '解读完成'}
+                        {!record.result ? '等待解读...' : (record.isError ? '连接失败' : '解读完成')}
                       </span>
                     </div>
                     
@@ -93,13 +97,14 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({
                         )}
                       </div>
                       
-                      {record.isError ? (
+                      {/* 如果没有结果(比如刷新页面中断了)，或者明确报错，都显示重试按钮 */}
+                      {!record.result || record.isError ? (
                         <button
                           onClick={() => onRetryRecord(record)}
                           className="px-3 py-1.5 bg-red-600/80 hover:bg-red-500 text-white text-xs rounded transition-colors flex items-center gap-1"
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
-                          重新发送
+                          {!record.result ? '继续生成' : '重新发送'}
                         </button>
                       ) : (
                         <button

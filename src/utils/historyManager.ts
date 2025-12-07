@@ -7,7 +7,7 @@ export interface HistoryRecord {
   spreadId: string; // e.g., 'time-flow'
   cards: { card: TarotCard; isReversed: boolean }[];
   question: string;
-  result: ReadingResult;
+  result: ReadingResult | null;
   isError: boolean;
 }
 
@@ -25,12 +25,13 @@ export const HistoryManager = {
     }
   },
 
-  saveHistory: (record: Omit<HistoryRecord, 'id' | 'date'>) => {
+  saveHistory: (record: Omit<HistoryRecord, 'id' | 'date'>): number => {
     try {
       const currentHistory = HistoryManager.getHistory();
+      const newId = Date.now();
       const newRecord: HistoryRecord = {
         ...record,
-        id: Date.now(),
+        id: newId,
         date: new Date().toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
       };
 
@@ -43,8 +44,10 @@ export const HistoryManager = {
       }
 
       localStorage.setItem(HISTORY_KEY, JSON.stringify(updatedHistory));
+      return newId;
     } catch (e) {
       console.error("Failed to save history", e);
+      return 0;
     }
   },
 
