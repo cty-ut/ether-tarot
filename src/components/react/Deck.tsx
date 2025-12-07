@@ -4,7 +4,9 @@ import { tarotDeck, spreads, type TarotCard, type SpreadConfig } from '../../uti
 import { Card } from './Card';
 import { getTarotReading, type ReadingResult } from '../../utils/aiClient';
 import { ReadingBox } from './ReadingBox';
-import { DonateModal } from './DonateModal'; // 引入 DonateModal
+import { DonateModal } from './DonateModal';
+import { HistoryManager, type HistoryRecord } from '../../utils/historyManager';
+import { HistoryModal } from './HistoryModal';
 
 // 扇形布局参数
 const FAN_COUNT = 22; // 显示多少张牌供选择
@@ -48,6 +50,10 @@ export const Deck: React.FC = () => {
   // 赞赏弹窗状态 (Deck 级别的)
   const [isDonateOpen, setIsDonateOpen] = useState(false);
 
+  // 历史记录状态
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [history, setHistory] = useState<HistoryRecord[]>([]);
+
   // 扇形牌组的状态，存储每张牌的唯一ID
   const [fanCards, setFanCards] = useState<number[]>([]);
 
@@ -71,6 +77,8 @@ export const Deck: React.FC = () => {
     preloadImage('/patterns/Cardback.png');
     // 初始化检查限制
     setIsDailyLimitReached(checkDailyLimit());
+    // 加载历史记录
+    setHistory(HistoryManager.getHistory());
   }, []);
 
   // 进入抽牌阶段时，初始化扇形牌组
@@ -203,17 +211,78 @@ export const Deck: React.FC = () => {
   };
 
   // 调用 AI
-  const fetchReading = async (cards: { card: TarotCard; isReversed: boolean }[]) => {
+  const fetchReading = async (cards: { card: TarotCard; isReversed: boolean }[], retryRecordId?: number) => {
       setIsAiLoading(true);
       try {
           // 传递牌阵 ID，让后端选择对应的 Prompt 策略
           const result = await getTarotReading(question, cards, selectedSpread.id);
           setReadingResult(result);
+          
+          const isError = result.summary === "连接被干扰";
+          
+          if (retryRecordId) {
+              // 如果是重试，更新原有记录
+              HistoryManager.updateRecord(retryRecordId, result, isError);
+          } else {
+              // 否则保存新记录
+              HistoryManager.saveHistory({
+                  spreadId: selectedSpread.id,
+                  cards: cards,
+                  question: question,
+                  result: result,
+                  isError: isError
+              });
+          }
+          // 更新本地状态中的历史记录
+          setHistory(HistoryManager.getHistory());
+          
       } catch (error) {
           console.error("AI Error", error);
       } finally {
           setIsAiLoading(false);
       }
+  };
+
+  // 处理历史记录操作
+  const handleSelectRecord = (record: HistoryRecord) => {
+      // 恢复状态以显示结果
+      // 找到对应的牌阵配置
+      const spread = spreads.find(s => s.id === record.spreadId) || spreads[1];
+      setSelectedSpread(spread);
+      
+      // 恢复卡牌和问题
+      // 注意：这里我们需要把 HistoryRecord 里的 cards (TarotCard & isReversed) 
+      // 转换成 drawnCards 需要的格式 (加 isRevealed: true)
+      const restoredCards = record.cards.map(c => ({
+          ...c,
+          isRevealed: true
+      }));
+      setDrawnCards(restoredCards);
+      setQuestion(record.question);
+      setReadingResult(record.result);
+      
+      // 关闭弹窗，进入结果页
+      setIsHistoryOpen(false);
+      setStep('done');
+  };
+
+  const handleRetryRecord = async (record: HistoryRecord) => {
+      // 恢复状态并立即重试
+      const spread = spreads.find(s => s.id === record.spreadId) || spreads[1];
+      setSelectedSpread(spread);
+      
+      const restoredCards = record.cards.map(c => ({
+          ...c,
+          isRevealed: true
+      }));
+      setDrawnCards(restoredCards);
+      setQuestion(record.question);
+      
+      setIsHistoryOpen(false);
+      setStep('done'); // 进入结果页显示 Loading
+      
+      // 触发重试 API 调用
+      await fetchReading(record.cards, record.id);
   };
 
   // 自动滚动到底部当结果出来时
@@ -240,6 +309,15 @@ export const Deck: React.FC = () => {
                <span className="text-[10px] uppercase tracking-widest font-medium">赞赏</span>
            </button>
 
+           {/* 移动端左上角历史记录按钮 */}
+           <button 
+               onClick={() => setIsHistoryOpen(true)}
+               className="absolute top-0 left-0 md:hidden flex items-center gap-1.5 px-3 py-1.5 border border-mystic-gold/30 rounded-full text-mystic-gold/80 hover:text-mystic-gold bg-black/20 backdrop-blur-sm z-30"
+           >
+               <span className="text-xs">↺</span>
+               <span className="text-[10px] uppercase tracking-widest font-medium">历史</span>
+           </button>
+
            <motion.div
              initial={{ opacity: 0, y: -20 }}
              animate={{ opacity: 1, y: 0 }}
@@ -256,6 +334,15 @@ export const Deck: React.FC = () => {
              >
                 <span className="text-xs">✨</span>
                 <span className="text-[10px] uppercase tracking-widest font-medium">随喜赞赏</span>
+             </button>
+
+             {/* PC端历史记录入口 - 标题左侧 */}
+             <button 
+                onClick={() => setIsHistoryOpen(true)}
+                className="hidden md:flex absolute left-[-180px] top-1/2 -translate-y-1/2 items-center gap-2 px-3 py-1.5 border border-mystic-gold/30 rounded-full text-mystic-gold/80 hover:text-mystic-gold hover:bg-mystic-gold/10 hover:border-mystic-gold transition-all duration-300 backdrop-blur-sm z-30"
+             >
+                <span className="text-xs">↺</span>
+                <span className="text-[10px] uppercase tracking-widest font-medium">历史记录</span>
              </button>
            </motion.div>
 
@@ -650,6 +737,14 @@ export const Deck: React.FC = () => {
       {/* Deck 组件的赞赏弹窗 (服务于首页按钮) */}
       <DonateModal isOpen={isDonateOpen} onClose={() => setIsDonateOpen(false)} />
 
+      {/* 历史记录弹窗 */}
+      <HistoryModal 
+        isOpen={isHistoryOpen} 
+        onClose={() => setIsHistoryOpen(false)} 
+        history={history}
+        onSelectRecord={handleSelectRecord}
+        onRetryRecord={handleRetryRecord}
+      />
     </div>
   );
 };
