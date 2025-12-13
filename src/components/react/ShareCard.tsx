@@ -1,5 +1,5 @@
 import React, { forwardRef } from 'react';
-import { QRCodeSVG } from 'qrcode.react';
+import { QRCodeCanvas } from 'qrcode.react';
 import type { ReadingResult } from '../../utils/aiClient';
 import type { TarotCard, SpreadConfig } from '../../utils/tarotData';
 
@@ -172,7 +172,7 @@ export const ShareCard = forwardRef<HTMLDivElement, ShareCardProps>(({ question,
              <span className="text-[8px] text-mystic-gold/80 font-serif italic">Your Destiny</span>
            </div>
            <div className="p-1 bg-white rounded-sm">
-             <QRCodeSVG 
+             <QRCodeCanvas 
                 value="https://ether-tarot.com" 
                 size={48} 
                 level="L" 
