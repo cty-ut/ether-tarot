@@ -19,6 +19,8 @@ const { title } = Astro.props;
 		<link rel="manifest" href="/manifest.json" />
 		<meta name="generator" content={Astro.generator} />
 		<meta name="theme-color" content="#050505" />
+		<!-- 预加载关键资源：卡背图 (目前 5MB+，强烈建议压缩) -->
+		<link rel="preload" as="image" href="/patterns/Cardback.png" />
 		<title>{title}</title>
         <style>
             /* 全局背景层 */
