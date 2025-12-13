@@ -1,4 +1,5 @@
 import React, { forwardRef } from 'react';
+import { QRCodeSVG } from 'qrcode.react';
 import type { ReadingResult } from '../../utils/aiClient';
 import type { TarotCard, SpreadConfig } from '../../utils/tarotData';
 
@@ -10,6 +11,7 @@ interface ShareCardProps {
 }
 
 export const ShareCard = forwardRef<HTMLDivElement, ShareCardProps>(({ question, cards, result, spreadConfig }, ref) => {
+
   // 辅助截断函数，因为 html2canvas 不支持 line-clamp
   const truncateText = (text: string, maxLength: number) => {
     return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
@@ -81,11 +83,11 @@ export const ShareCard = forwardRef<HTMLDivElement, ShareCardProps>(({ question,
         <div className="z-20 w-full max-w-[320px] bg-white/5 border border-white/10 px-4 py-3 rounded-lg mb-4 backdrop-blur-sm flex flex-col justify-center items-center gap-2">
             <div className="flex w-full justify-between items-center gap-2">
                 <div className="flex-1 text-center border-r border-white/10 pr-2">
-                    <p className="text-neutral-500 text-[8px] uppercase tracking-widest mb-1">Option A</p>
+                    <p className="text-neutral-500 text-[8px] uppercase tracking-widest mb-1">选项 A</p>
                     <p className="text-white text-[10px] font-serif leading-tight">{truncateText(choices.optionA, 20)}</p>
                 </div>
                 <div className="flex-1 text-center pl-2">
-                    <p className="text-neutral-500 text-[8px] uppercase tracking-widest mb-1">Option B</p>
+                    <p className="text-neutral-500 text-[8px] uppercase tracking-widest mb-1">选项 B</p>
                     <p className="text-white text-[10px] font-serif leading-tight">{truncateText(choices.optionB, 20)}</p>
                 </div>
             </div>
@@ -157,12 +159,27 @@ export const ShareCard = forwardRef<HTMLDivElement, ShareCardProps>(({ question,
       {/* 底部 */}
       <div className="z-20 w-full flex justify-between items-end mt-auto pt-3 pb-3 border-t border-white/10">
         <div className="flex flex-col">
-          <span className="text-[8px] text-neutral-500 uppercase tracking-wider">Date</span>
-          <span className="text-[10px] text-neutral-300 font-mono">{new Date().toLocaleDateString()}</span>
+          <span className="text-[8px] text-neutral-500 uppercase tracking-wider mb-1">Date</span>
+          <span className="text-[10px] text-neutral-300 font-mono mb-2">{new Date().toLocaleDateString()}</span>
+          <div className="flex items-center gap-1.5 opacity-60">
+             <span className="text-[8px] text-mystic-gold uppercase tracking-widest">Ether Tarot</span>
+          </div>
         </div>
-        <div className="flex flex-col items-end">
-           {/* 移除 Scan to Reveal */}
-           <span className="text-[10px] text-mystic-gold tracking-wider font-serif">ether-tarot.com</span>
+        
+        <div className="flex items-center gap-2">
+           <div className="flex flex-col items-end mr-1">
+             <span className="text-[8px] text-neutral-500 uppercase tracking-widest mb-0.5">Scan to Reveal</span>
+             <span className="text-[8px] text-mystic-gold/80 font-serif italic">Your Destiny</span>
+           </div>
+           <div className="p-1 bg-white rounded-sm">
+             <QRCodeSVG 
+                value="https://ether-tarot.com" 
+                size={48} 
+                level="L" 
+                fgColor="#000000" 
+                bgColor="#FFFFFF"
+             />
+           </div>
         </div>
       </div>
     </div>
