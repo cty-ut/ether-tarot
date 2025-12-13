@@ -154,24 +154,30 @@ export const ReadingBox: React.FC<ReadingBoxProps> = ({ result, isLoading, quest
         <p className="text-white italic">{result.advice}</p>
       </div>
 
-      {/* 底部操作栏 */}
-      <div className="mt-10 flex flex-col items-center gap-4">
+      <div className="mt-10 flex flex-col items-center gap-4 w-full">
         
-        {/* 随喜赞赏按钮 - 放在生成报告按钮上方，作为一个低调但显眼的入口 */}
+        {/* 新版：更有存在感的赞赏卡片 */}
         <button 
             onClick={() => setIsDonateOpen(true)}
-            className="flex items-center gap-2 text-mystic-gold/40 hover:text-mystic-gold transition-colors group text-[10px] tracking-[0.2em]"
+            className="w-full relative group overflow-hidden rounded-xl border border-mystic-gold/30 bg-gradient-to-r from-mystic-gold/5 via-mystic-gold/10 to-mystic-gold/5 hover:border-mystic-gold/60 transition-all duration-500 p-4 flex flex-col items-center gap-2"
         >
-            <span className="text-base opacity-60 group-hover:opacity-100 group-hover:scale-110 transition-all">✨</span>
-            <span className="border-b border-transparent group-hover:border-mystic-gold/50 pb-0.5 uppercase">
-                随喜赞赏 · Donate
-            </span>
+            <div className="absolute inset-0 bg-mystic-gold/5 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out"></div>
+            
+            <div className="flex items-center justify-center gap-3 relative z-10 w-full text-center">
+                <span className="text-xl">✨</span>
+                <span className="text-mystic-gold text-lg font-serif tracking-[0.2em] font-bold uppercase group-hover:text-white transition-colors whitespace-nowrap">随喜赞赏</span>
+                <span className="text-xl">✨</span>
+            </div>
+            
+            <p className="text-[10px] text-neutral-400 group-hover:text-neutral-300 relative z-10 transition-colors">
+                服务器由开发者自费维护，感谢您的支持与鼓励 ❤️
+            </p>
         </button>
 
         <button 
           onClick={handleGenerateImage}
           disabled={isGenerating}
-          className="group relative px-6 py-2 bg-mystic-gold/10 border border-mystic-gold/30 rounded-full text-mystic-gold text-xs uppercase tracking-widest hover:bg-mystic-gold hover:text-black transition-all duration-300 flex items-center gap-2 disabled:opacity-50"
+          className="w-full mt-2 group relative px-6 py-3 bg-black/40 border border-white/10 rounded-full text-neutral-400 text-xs uppercase tracking-widest hover:bg-white/5 hover:text-white hover:border-white/30 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50"
         >
           {isGenerating ? (
             <>
