@@ -115,10 +115,10 @@ export const ShareCard = forwardRef<HTMLDivElement, ShareCardProps>(({ question,
                    />
                    {/* 这里不再显示 REV 遮罩，保持清爽 */}
                 </div>
-                <span className="text-[10px] text-mystic-gold font-bold text-center leading-tight h-6 flex items-center justify-center w-full overflow-hidden text-ellipsis px-1">
+                <span className="text-[10px] text-mystic-gold font-bold text-center leading-tight h-auto min-h-[1.5em] flex items-center justify-center w-full px-1 mt-1">
                     {item.card.name_cn}
                 </span>
-                <span className="text-[8px] text-neutral-500 uppercase tracking-wider text-center w-full overflow-hidden text-ellipsis whitespace-nowrap">
+                <span className="text-[9px] text-neutral-400 uppercase tracking-wider text-center w-full mt-0.5 pb-1">
                    {spreadConfig.positionNames[index] || `Card ${index + 1}`}
                 </span>
             </div>

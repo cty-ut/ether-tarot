@@ -7,8 +7,8 @@ const API_KEY = import.meta.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY;
 // --- Prompt Strategies ---
 
 interface PromptStrategy {
-  systemPrompt: string;
-  getUserPrompt: (question: string, cardDescriptions: string) => string;
+  getSystemPrompt: (lang: 'zh' | 'en') => string;
+  getUserPrompt: (question: string, cardDescriptions: string, lang: 'zh' | 'en') => string;
 }
 
 // 1. 核心通用规则 (Common Core)
